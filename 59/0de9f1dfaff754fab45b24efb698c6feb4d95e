@@ -1,0 +1,54 @@
+test/inductor/test_torchinductor_codegen_dynamic_shapes.py
+  s_3d78475bfcd0bd::t_d6389a8345c652 11
+  s_3d78475bfcd0bd::t_13fb3d4704202c 518-519
+test/inductor/test_torchinductor_opinfo_properties.py
+  s_3d78475bfcd0bd::t_a8ec22a1cfa478 48,681,817,889,940,994
+  s_3d78475bfcd0bd::t_3cdb602c710196 57
+  s_3d78475bfcd0bd::t_e83d491b4991a3 621-622
+test/inductor/test_torchinductor_opinfo.py
+  s_3d78475bfcd0bd::t_bbeaaf04e96fe8 36
+  s_3d78475bfcd0bd::t_0448e0b733eb18 1275-1276
+test/inductor/test_torchinductor_dynamic_shapes.py
+  s_3d78475bfcd0bd::t_85f338375e5729 236
+  s_3d78475bfcd0bd::t_e1eb867e2a3666 30
+test/inductor/test_torchinductor_codegen_config_overrides.py
+  s_3d78475bfcd0bd::t_3f52829f373aef 13
+  s_3d78475bfcd0bd::t_d421f0b0f230f2 30-31
+test/inductor/test_torchbind.py
+  s_3d78475bfcd0bd::t_70e6c4bd62ad9f 16-19
+  s_3d78475bfcd0bd::t_9882ff0c09c441 28-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "590de9f1dfaff754fab45b24efb698c6feb4d95e",
+  "prompts": {},
+  "humans": {
+    "h_b23a6a8439c0dd": {
+      "author": "unknown"
+    }
+  },
+  "sessions": {
+    "s_3d78475bfcd0bd": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a729d818cefeaed6264ea6f",
+        "model": "glm-5.2"
+      },
+      "human_author": "chenm-123 <18729740621@163.com>",
+      "custom_attributes": {
+        "source_scene": "agent",
+        "edit_kind": "file_edit",
+        "tool_use_id": "6a744fe31060b434be285016",
+        "external_session_id": "6a729d818cefeaed6264ea6f",
+        "tool_type": "builtin",
+        "operation_id": "6a744fe31060b434be285016",
+        "session_id": "6a729d818cefeaed6264ea6f",
+        "runtime_client": "trae-tob-git-ai",
+        "client_type": "ide",
+        "dedupe_key": "6a729d818cefeaed6264ea6f:6a744fe31060b434be285016:afterEdit:e5a91422",
+        "tool_id": "icube:applyChatSnapshotPatch"
+      }
+    }
+  }
+}
