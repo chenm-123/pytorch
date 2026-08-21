@@ -1,0 +1,40 @@
+test/inductor/test_torchinductor_opinfo.py
+  s_f8ff6fb7ea9964::t_c411775cf63590 1378
+  s_f8ff6fb7ea9964::t_7a1b91c99cc65b 1300
+  s_f8ff6fb7ea9964::t_00d185c868f4a8 1320
+  s_f8ff6fb7ea9964::t_91f275b12bc0f6 1586-1588
+  s_f8ff6fb7ea9964::t_d71a7795f239ee 172
+  s_f8ff6fb7ea9964::t_6a552ae04bfa16 26
+  s_f8ff6fb7ea9964::t_7c211fa422debf 1550,1552
+  s_f8ff6fb7ea9964::t_ca6a2578d5c04a 1524,1528
+  s_f8ff6fb7ea9964::t_fdb15f531f7eb3 1305
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "9ec6060274f070a103ae29d2a302639036a5d66f",
+  "prompts": {},
+  "sessions": {
+    "s_f8ff6fb7ea9964": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a866c7f93b1a2c183b299f8",
+        "model": "Doubao_1_6"
+      },
+      "human_author": "chenm-123 <18729740621@163.com>",
+      "custom_attributes": {
+        "edit_kind": "file_edit",
+        "client_type": "ide",
+        "session_id": "6a866c7f93b1a2c183b299f8",
+        "runtime_client": "trae-tob-git-ai",
+        "tool_use_id": "6a87c04393b1a2c183b29e3f",
+        "tool_type": "builtin",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "source_scene": "agent",
+        "external_session_id": "6a866c7f93b1a2c183b299f8",
+        "operation_id": "6a87c04393b1a2c183b29e3f",
+        "dedupe_key": "6a866c7f93b1a2c183b299f8:6a87c04393b1a2c183b29e3f:afterEdit:7dbfd844"
+      }
+    }
+  }
+}
