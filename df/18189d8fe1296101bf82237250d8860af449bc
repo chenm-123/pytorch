@@ -1,0 +1,32 @@
+test/inductor/test_torchinductor_dynamic_shapes.py
+  s_f5a6495afa571c::t_698397745e7955 1402
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "df18189d8fe1296101bf82237250d8860af449bc",
+  "prompts": {},
+  "sessions": {
+    "s_f5a6495afa571c": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a8e43b6c47f26185ff41ec1",
+        "model": "Doubao-Seed-2.1-turbo"
+      },
+      "human_author": "chenm-123 <18729740621@163.com>",
+      "custom_attributes": {
+        "operation_id": "6a8e9becc47f26185ff4242b",
+        "tool_use_id": "6a8e9becc47f26185ff4242b",
+        "runtime_client": "trae-tob-git-ai",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "source_scene": "agent",
+        "dedupe_key": "6a8e43b6c47f26185ff41ec1:6a8e9becc47f26185ff4242b:afterEdit:08b5cd81",
+        "client_type": "ide",
+        "external_session_id": "6a8e43b6c47f26185ff41ec1",
+        "tool_type": "builtin",
+        "session_id": "6a8e43b6c47f26185ff41ec1",
+        "edit_kind": "file_edit"
+      }
+    }
+  }
+}
