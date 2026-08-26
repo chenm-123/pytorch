@@ -1,0 +1,33 @@
+test/inductor/test_torchinductor_opinfo.py
+  s_f5a6495afa571c::t_680a0d1964de0e 1389,1535,1539,1563
+  s_f5a6495afa571c::t_24f22e38b9d60c 43-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "3716f9ce923d8bd4fddbdd179f6eb575ae0fe1b9",
+  "prompts": {},
+  "sessions": {
+    "s_f5a6495afa571c": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a8e43b6c47f26185ff41ec1",
+        "model": "Doubao-Seed-2.1-turbo"
+      },
+      "human_author": "chenm-123 <18729740621@163.com>",
+      "custom_attributes": {
+        "client_type": "ide",
+        "edit_kind": "file_edit",
+        "runtime_client": "trae-tob-git-ai",
+        "operation_id": "6a8e4fe9c47f26185ff42232",
+        "session_id": "6a8e43b6c47f26185ff41ec1",
+        "tool_use_id": "6a8e4fe9c47f26185ff42232",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "source_scene": "agent",
+        "dedupe_key": "6a8e43b6c47f26185ff41ec1:6a8e4fe9c47f26185ff42232:afterEdit:7dbfd844",
+        "external_session_id": "6a8e43b6c47f26185ff41ec1",
+        "tool_type": "builtin"
+      }
+    }
+  }
+}
