@@ -1,0 +1,31 @@
+test/inductor/test_torchinductor_codegen_dynamic_shapes.py
+  s_ace4a0af4da9da::t_55dfaa422ab0b5 24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "ec1e6074b001839decab1dcc6cc62f406bb8d28a",
+  "prompts": {},
+  "sessions": {
+    "s_ace4a0af4da9da": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a8f9f1ec47f26185ff427b1",
+        "model": "deepseek-V4-Pro__dev"
+      },
+      "human_author": "chenm-123 <18729740621@163.com>",
+      "custom_attributes": {
+        "external_session_id": "6a8f9f1ec47f26185ff427b1",
+        "source_scene": "agent",
+        "client_type": "ide",
+        "edit_kind": "bash",
+        "operation_id": "6a8fdd04711a1e9f866bfe2b",
+        "tool_use_id": "6a8fdd04711a1e9f866bfe2b",
+        "display_model_name": "DeepSeek-V4-Pro",
+        "runtime_client": "trae-tob-git-ai",
+        "session_id": "6a8f9f1ec47f26185ff427b1",
+        "tool_name": "RunCommand"
+      }
+    }
+  }
+}
