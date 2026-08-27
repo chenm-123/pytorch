@@ -1,0 +1,33 @@
+test/inductor/test_torchbind.py
+  s_eca24a87650440::t_a3eb12ad3a160e 16
+  s_eca24a87650440::t_58be32e17b0275 435,443-444
+  s_eca24a87650440::t_ed65a72d140eb9 454-458
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "60d5271c3c89a123cdb3c0843049caf25a5c262a",
+  "prompts": {},
+  "sessions": {
+    "s_eca24a87650440": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a8eb4bbc47f26185ff425f1",
+        "model": "deepseek-V4-Pro__dev"
+      },
+      "human_author": "chenm-123 <18729740621@163.com>",
+      "custom_attributes": {
+        "edit_kind": "file_edit",
+        "session_id": "6a8eb4bbc47f26185ff425f1",
+        "tool_use_id": "6a9003dc711a1e9f866bffa1",
+        "tool_name": "Edit",
+        "operation_id": "6a9003dc711a1e9f866bffa1",
+        "client_type": "ide",
+        "runtime_client": "trae-tob-git-ai",
+        "source_scene": "agent",
+        "external_session_id": "6a8eb4bbc47f26185ff425f1",
+        "display_model_name": "DeepSeek-V4-Pro"
+      }
+    }
+  }
+}
