@@ -1,0 +1,38 @@
+test/inductor/test_torchinductor_dynamic_shapes.py
+  s_c3ebc9c968e6eb::t_3efaf2986a2824 246-252
+  s_c3ebc9c968e6eb::t_9a98c748d527c7 663-671,684
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "3c04cde92bbf0ea5befb2c86fcd7bfa3e79042de",
+  "prompts": {},
+  "humans": {
+    "h_07f1ef7a69cd59": {
+      "author": "chenm-123 <18729740621@163.com>"
+    }
+  },
+  "sessions": {
+    "s_c3ebc9c968e6eb": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a9781764189a9cb07163d4c",
+        "model": "glm-5.3-flash__dev"
+      },
+      "human_author": "chenm-123 <18729740621@163.com>",
+      "custom_attributes": {
+        "operation_id": "6a9a84074189a9cb071642bc",
+        "tool_id": "Edit",
+        "session_id": "6a9781764189a9cb07163d4c",
+        "tool_use_id": "6a9a84074189a9cb071642bc",
+        "external_session_id": "6a9781764189a9cb07163d4c",
+        "dedupe_key": "6a9781764189a9cb07163d4c:6a9a84074189a9cb071642bc:afterEdit:08b5cd81",
+        "runtime_client": "trae-tob-git-ai",
+        "source_scene": "unknown",
+        "client_type": "ide",
+        "edit_kind": "file_edit",
+        "tool_type": "agent"
+      }
+    }
+  }
+}
