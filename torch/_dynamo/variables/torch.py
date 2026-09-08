@@ -164,43 +164,42 @@ def _is_supported_out_tensor_layout(
     )
 
 
-supported_ctx_manager_classes = dict.fromkeys(
-    [
-        torch.profiler.profiler.profile,
-        torch.autograd.forward_ad._set_fwd_grad_enabled,
-        torch.autograd.forward_ad.dual_level,
-        torch.autograd.profiler.profile,
-        torch.autograd.profiler.record_function,
-        torch._C.DisableTorchFunctionSubclass,
-        torch._C.DisableTorchFunction,
-        torch._functorch.vmap.vmap_increment_nesting,
-        torch._functorch.eager_transforms.grad_increment_nesting,
-        torch._functorch.eager_transforms.jvp_increment_nesting,
-        torch._functorch.eager_transforms.enable_inplace_requires_grad,
-        torch.amp.autocast_mode.autocast,
-        torch.autograd.grad_mode.enable_grad,
-        torch.autograd.grad_mode.inference_mode,
-        torch.autograd.grad_mode.no_grad,
-        torch.autograd.grad_mode.set_grad_enabled,
-        torch.autograd.graph.disable_saved_tensors_hooks,
-        torch.cpu.amp.autocast_mode.autocast,
-        torch.cuda.amp.autocast_mode.autocast,
-        torch.cuda.use_mem_pool,
-        torch.cuda.use_mem_pool.__wrapped__,  # type: ignore[attr-defined]
-        torch.fx.traceback.annotate,
-        torch.fx.traceback.annotate.__wrapped__,  # type: ignore[attr-defined]
-        torch.fx.traceback._dynamo_region_activation_memory_budget,
-        torch.fx.traceback._dynamo_region_activation_memory_budget.__wrapped__,  # type: ignore[attr-defined]
-        # We'll let Dynamo inline into the contextlib part of these context
-        # manager instances, all the way till it invokes the wrapped function
-        # itself (at which point we wrap it back to special context manager
-        # VTs).
-        #
-        # This allows us to support calling functions decorated with these
-        # context managers, without much extra effort or code dup.
-        torch.nn.attention.sdpa_kernel.__wrapped__,  # type: ignore[attr-defined]
-    ]
-)
+_CORE_SUPPORTED_CTX_MANAGER_CLASSES = [
+    torch.profiler.profiler.profile,
+    torch.autograd.forward_ad._set_fwd_grad_enabled,
+    torch.autograd.forward_ad.dual_level,
+    torch.autograd.profiler.profile,
+    torch.autograd.profiler.record_function,
+    torch._C.DisableTorchFunctionSubclass,
+    torch._C.DisableTorchFunction,
+    torch._functorch.vmap.vmap_increment_nesting,
+    torch._functorch.eager_transforms.grad_increment_nesting,
+    torch._functorch.eager_transforms.jvp_increment_nesting,
+    torch._functorch.eager_transforms.enable_inplace_requires_grad,
+    torch.amp.autocast_mode.autocast,
+    torch.autograd.grad_mode.enable_grad,
+    torch.autograd.grad_mode.inference_mode,
+    torch.autograd.grad_mode.no_grad,
+    torch.autograd.grad_mode.set_grad_enabled,
+    torch.autograd.graph.disable_saved_tensors_hooks,
+    torch.fx.traceback.annotate,
+    torch.fx.traceback.annotate.__wrapped__,  # type: ignore[attr-defined]
+    torch.fx.traceback._dynamo_region_activation_memory_budget,
+    torch.fx.traceback._dynamo_region_activation_memory_budget.__wrapped__,  # type: ignore[attr-defined]
+    # We'll let Dynamo inline into the contextlib part of these context
+    # manager instances, all the way till it invokes the wrapped function
+    # itself (at which point we wrap it back to special context manager
+    # VTs).
+    #
+    # This allows us to support calling functions decorated with these
+    # context managers, without much extra effort or code dup.
+    torch.nn.attention.sdpa_kernel.__wrapped__,  # type: ignore[attr-defined]
+]
+
+# Device-specific entries are contributed by DeviceInterface's
+# ``dynamo_supported_ctx_manager_classes`` slot and merged in
+# ``_rebuild_device_derived_tables()``.
+supported_ctx_manager_classes: dict = {}
 
 
 REWRITE_OPS_TO_TENSOR_SIZE_METHOD = dict.fromkeys(
@@ -248,12 +247,11 @@ if torch.distributed.is_available():
     )
 
 
-_rebuilding_constant_fold_tables = False
+_rebuilding_device_derived_tables = False
 
 
-def _rebuild_constant_fold_tables() -> None:
-    """(Re)build the constant fold tables from the core lists plus every
-    registered device interface's ``dynamo_constant_fold_fns*`` slots.
+def _rebuild_device_derived_tables() -> None:
+    """(Re)build the tables that are derived from the device interface registry.
 
     Called once at import time and again whenever a device interface is
     registered afterwards, so late-registering out-of-tree backends are picked
@@ -264,14 +262,17 @@ def _rebuild_constant_fold_tables() -> None:
     triggers another rebuild. The first (outermost) rebuild already observes
     the fully initialized registry, so nested calls are skipped.
     """
-    global _rebuilding_constant_fold_tables
-    if _rebuilding_constant_fold_tables:
+    global _rebuilding_device_derived_tables
+    if _rebuilding_device_derived_tables:
         return
-    _rebuilding_constant_fold_tables = True
+    _rebuilding_device_derived_tables = True
     try:
         _rebuild_constant_fold_tables_impl()
+        _rebuild_supported_ctx_manager_classes_impl()
+        _rebuild_synchronize_fns_impl()
+        _rebuild_current_stream_fns_impl()
     finally:
-        _rebuilding_constant_fold_tables = False
+        _rebuilding_device_derived_tables = False
 
 
 def _rebuild_constant_fold_tables_impl() -> None:
@@ -292,10 +293,50 @@ def _rebuild_constant_fold_tables_impl() -> None:
     constant_fold_functions.update(fold)
 
 
+def _rebuild_supported_ctx_manager_classes_impl() -> None:
+    entries = dict.fromkeys(_CORE_SUPPORTED_CTX_MANAGER_CLASSES)
+    for name, device_interface in get_registered_device_interfaces():
+        if ":" in name:
+            # skip device index aliases like "cuda:0"
+            continue
+        entries.update(
+            dict.fromkeys(device_interface.dynamo_supported_ctx_manager_classes)
+        )
+    supported_ctx_manager_classes.clear()
+    supported_ctx_manager_classes.update(entries)
+
+
+def _rebuild_synchronize_fns_impl() -> None:
+    # Maps torch.*.synchronize functions to their device type; the None entry
+    # is torch.accelerator.synchronize, resolved dynamically at trace time.
+    table = {torch.accelerator.synchronize: None}
+    for name, device_interface in get_registered_device_interfaces():
+        if ":" in name:
+            # skip device index aliases like "cuda:0"
+            continue
+        for fn in device_interface.dynamo_synchronize_fns:
+            table[fn] = name
+    _synchronize_fn_to_device_type.clear()
+    _synchronize_fn_to_device_type.update(table)
+
+
+def _rebuild_current_stream_fns_impl() -> None:
+    fns = [torch.accelerator.current_stream]
+    for name, device_interface in get_registered_device_interfaces():
+        if ":" in name:
+            # skip device index aliases like "cuda:0"
+            continue
+        fns.extend(device_interface.dynamo_current_stream_fns)
+    _current_stream_fns.clear()
+    _current_stream_fns.extend(fns)
+
+
 # Convert to dicts for O(1) access times
 constant_fold_functions_need_guards: dict = {}
 constant_fold_functions: dict = {}
-_rebuild_constant_fold_tables()
+_synchronize_fn_to_device_type: dict = {}
+_current_stream_fns: list = []
+_rebuild_device_derived_tables()
 
 # Ops that consume scalar values from 0-d tensors (via .item()) for computation
 # only, not for output shapes. When capture_scalar_outputs is enabled, these ops
@@ -2806,20 +2847,7 @@ class TorchInGraphFunctionVariable(BaseTorchVariable):
                     from_exc=e,
                 )
 
-        _synchronize_fn_to_device_type = {
-            torch.cuda.synchronize: "cuda",
-            torch.xpu.synchronize: "xpu",
-            torch.mps.synchronize: "mps",
-            torch.cpu.synchronize: "cpu",
-        }
-
-        @register(
-            torch.accelerator.synchronize,
-            torch.cuda.synchronize,
-            torch.xpu.synchronize,
-            torch.mps.synchronize,
-            torch.cpu.synchronize,
-        )
+        @register(*_synchronize_fn_to_device_type)
         def handle_synchronize(
             self,
             tx: "InstructionTranslatorBase",

@@ -266,6 +266,23 @@ class DeviceInterface:
     dynamo_constant_fold_fns: tuple[Callable, ...] = ()
     dynamo_constant_fold_fns_need_guards: tuple[Callable, ...] = ()
 
+    # Callables that Dynamo wraps as in-graph context manager variables. They
+    # are merged into ``supported_ctx_manager_classes`` in
+    # torch/_dynamo/variables/torch.py via get_registered_device_interfaces();
+    # declaring them here lets an out-of-tree backend provide its own context
+    # manager factories without modifying Dynamo.
+    dynamo_supported_ctx_manager_classes: tuple[Callable, ...] = ()
+
+    # torch.*.synchronize functions provided by this device. They are merged
+    # into the synchronize fn -> device type table in
+    # torch/_dynamo/variables/torch.py via get_registered_device_interfaces().
+    dynamo_synchronize_fns: tuple[Callable, ...] = ()
+
+    # torch.*.current_stream functions provided by this device. They are
+    # merged into the current_stream handler registration list in
+    # torch/_dynamo/variables/torch.py via get_registered_device_interfaces().
+    dynamo_current_stream_fns: tuple[Callable, ...] = ()
+
 
 class DeviceGuard:
     """
@@ -310,6 +327,13 @@ class CudaInterface(DeviceInterface):
         torch.cuda.get_device_properties,
         torch.cuda.is_available,
     )
+    dynamo_supported_ctx_manager_classes = (
+        torch.cuda.amp.autocast_mode.autocast,
+        torch.cuda.use_mem_pool,
+        torch.cuda.use_mem_pool.__wrapped__,  # type: ignore[attr-defined]
+    )
+    dynamo_synchronize_fns = (torch.cuda.synchronize,)
+    dynamo_current_stream_fns = (torch.cuda.current_stream,)
 
     @staticmethod
     def is_gpu() -> bool:
@@ -540,6 +564,8 @@ class XpuInterface(DeviceInterface):
         torch.xpu.get_device_properties,
         torch.xpu.is_available,
     )
+    dynamo_synchronize_fns = (torch.xpu.synchronize,)
+    dynamo_current_stream_fns = (torch.xpu.current_stream,)
 
     @staticmethod
     def is_gpu() -> bool:
@@ -633,6 +659,9 @@ class CpuDeviceProperties:
 
 
 class CpuInterface(DeviceInterface):
+    dynamo_supported_ctx_manager_classes = (torch.cpu.amp.autocast_mode.autocast,)
+    dynamo_synchronize_fns = (torch.cpu.synchronize,)
+
     # pyrefly: ignore [bad-override]
     class Event(torch.Event):
         def __init__(self, enable_timing: bool = True) -> None:
@@ -699,6 +728,7 @@ class MpsInterface(DeviceInterface):
         torch.backends.mps.is_built,
         torch.mps.is_available,
     )
+    dynamo_synchronize_fns = (torch.mps.synchronize,)
 
     @staticmethod
     def is_gpu() -> bool:
@@ -817,11 +847,9 @@ def register_interface_for_device(
     # so late-registering out-of-tree backends are picked up. When it is not
     # loaded yet (or is mid-import), skip: the tables are built from the
     # registry when torch._dynamo.variables.torch is first imported.
-    import sys
-
     rebuild = getattr(
         sys.modules.get("torch._dynamo.variables.torch"),
-        "_rebuild_constant_fold_tables",
+        "_rebuild_device_derived_tables",
         None,
     )
     if rebuild is not None:
