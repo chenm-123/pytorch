@@ -16,6 +16,7 @@ specialized implementations for each hardware backend's unique features.
 """
 
 import inspect
+import sys
 import time
 from collections import namedtuple
 from collections.abc import Callable, Iterable
@@ -255,6 +256,16 @@ class DeviceInterface:
                 "This device is not capable of supporting Triton"
             )
 
+    # Tuples of torch.* functions that Dynamo constant-folds through. They are
+    # merged into the constant fold tables in torch/_dynamo/variables/torch.py
+    # via get_registered_device_interfaces(); declaring them here lets an
+    # out-of-tree backend participate in constant folding without modifying
+    # Dynamo. ``dynamo_constant_fold_fns_need_guards`` entries additionally
+    # get an EQUALS_MATCH guard installed (device-global state), and are also
+    # included in the plain fold table.
+    dynamo_constant_fold_fns: tuple[Callable, ...] = ()
+    dynamo_constant_fold_fns_need_guards: tuple[Callable, ...] = ()
+
 
 class DeviceGuard:
     """
@@ -290,6 +301,15 @@ class CudaInterface(DeviceInterface):
     # make sure Event and Stream are implemented and inherited from the torch.Event and torch.Stream
     Event = torch.cuda.Event  # type: ignore[assignment]
     Stream = torch.cuda.Stream  # type: ignore[assignment]
+
+    dynamo_constant_fold_fns_need_guards = (
+        torch.cuda.current_device,
+        torch.cuda.is_initialized,
+    )
+    dynamo_constant_fold_fns = (
+        torch.cuda.get_device_properties,
+        torch.cuda.is_available,
+    )
 
     @staticmethod
     def is_gpu() -> bool:
@@ -398,6 +418,8 @@ class MtiaInterface(DeviceInterface):
     device = torch.mtia.device  # type: ignore[assignment]
     Event = torch.mtia.Event  # type: ignore[assignment]
     Stream = torch.mtia.Stream  # type: ignore[assignment]
+
+    dynamo_constant_fold_fns = (torch.mtia.is_available,)
 
     @staticmethod
     def is_gpu() -> bool:
@@ -509,6 +531,15 @@ class XpuInterface(DeviceInterface):
     device = torch.xpu.device  # type: ignore[assignment]
     Event = torch.xpu.Event  # type: ignore[assignment]
     Stream = torch.xpu.Stream  # type: ignore[assignment]
+
+    dynamo_constant_fold_fns_need_guards = (
+        torch.xpu.current_device,
+        torch.xpu.is_initialized,
+    )
+    dynamo_constant_fold_fns = (
+        torch.xpu.get_device_properties,
+        torch.xpu.is_available,
+    )
 
     @staticmethod
     def is_gpu() -> bool:
@@ -663,6 +694,12 @@ class CpuInterface(DeviceInterface):
 
 
 class MpsInterface(DeviceInterface):
+    dynamo_constant_fold_fns = (
+        torch.backends.mps.is_available.__wrapped__,  # type: ignore[attr-defined]
+        torch.backends.mps.is_built,
+        torch.mps.is_available,
+    )
+
     @staticmethod
     def is_gpu() -> bool:
         return True
@@ -775,6 +812,20 @@ def register_interface_for_device(
     from .variables.user_defined import UserDefinedClassVariable
 
     UserDefinedClassVariable._in_graph_classes.cache_clear()
+
+    # Rebuild Dynamo's constant fold tables if that module is already loaded,
+    # so late-registering out-of-tree backends are picked up. When it is not
+    # loaded yet (or is mid-import), skip: the tables are built from the
+    # registry when torch._dynamo.variables.torch is first imported.
+    import sys
+
+    rebuild = getattr(
+        sys.modules.get("torch._dynamo.variables.torch"),
+        "_rebuild_constant_fold_tables",
+        None,
+    )
+    if rebuild is not None:
+        rebuild()
 
 
 def get_interface_for_device(device: str | torch.device) -> type[DeviceInterface]:

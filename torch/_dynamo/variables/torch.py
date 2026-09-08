@@ -209,27 +209,19 @@ REWRITE_OPS_TO_TENSOR_SIZE_METHOD = dict.fromkeys(
     ]
 )
 
-constant_fold_functions_need_guards = [
+_CORE_CONSTANT_FOLD_FUNCTIONS_NEED_GUARDS = [
     torch._C._functorch.get_dynamic_layer_stack_depth,
     torch.accelerator.current_device_index,
     torch.accelerator.current_accelerator,
-    torch.cuda.current_device,
-    torch.cuda.is_initialized,
-    torch.xpu.current_device,
-    torch.xpu.is_initialized,
     torch.__future__.get_overwrite_module_params_on_conversion,
 ]
 
-constant_fold_functions = [
+_CORE_CONSTANT_FOLD_FUNCTIONS = [
     torch._assert,
     torch._utils._get_device_index,
     torch._C._get_cublas_allow_tf32,
     torch._C._is_any_autocast_enabled,
     torch.accelerator.is_available,
-    torch.backends.mps.is_available.__wrapped__,  # type: ignore[attr-defined]
-    torch.backends.mps.is_built,
-    torch.cuda.get_device_properties,
-    torch.cuda.is_available,
     torch.distributed.is_available,
     torch.get_autocast_dtype,
     torch.get_autocast_gpu_dtype,
@@ -243,22 +235,67 @@ constant_fold_functions = [
     torch.promote_types,
     torch._C._get_privateuse1_backend_name,
     torch.autograd._is_checkpoint_valid,
-    torch.mps.is_available,
-    torch.mtia.is_available,
-    torch.xpu.get_device_properties,
-    torch.xpu.is_available,
-] + constant_fold_functions_need_guards
+]
+
+_CORE_CONSTANT_FOLD_FUNCTIONS.extend(_CORE_CONSTANT_FOLD_FUNCTIONS_NEED_GUARDS)
 if torch.distributed.is_available():
-    constant_fold_functions.extend(
+    _CORE_CONSTANT_FOLD_FUNCTIONS.extend(
         [
             torch.distributed.is_initialized,
             torch.distributed.get_rank,
             torch.distributed.get_world_size,
         ]
     )
-# Convert to dict for O(1) access times
-constant_fold_functions_need_guards = dict.fromkeys(constant_fold_functions_need_guards)
-constant_fold_functions = dict.fromkeys(constant_fold_functions)
+
+
+_rebuilding_constant_fold_tables = False
+
+
+def _rebuild_constant_fold_tables() -> None:
+    """(Re)build the constant fold tables from the core lists plus every
+    registered device interface's ``dynamo_constant_fold_fns*`` slots.
+
+    Called once at import time and again whenever a device interface is
+    registered afterwards, so late-registering out-of-tree backends are picked
+    up without modifying this module.
+
+    Re-entrancy guard: building the tables iterates the device registry, whose
+    lazy initialization registers the built-in interfaces, each of which
+    triggers another rebuild. The first (outermost) rebuild already observes
+    the fully initialized registry, so nested calls are skipped.
+    """
+    global _rebuilding_constant_fold_tables
+    if _rebuilding_constant_fold_tables:
+        return
+    _rebuilding_constant_fold_tables = True
+    try:
+        _rebuild_constant_fold_tables_impl()
+    finally:
+        _rebuilding_constant_fold_tables = False
+
+
+def _rebuild_constant_fold_tables_impl() -> None:
+    need_guards = dict.fromkeys(_CORE_CONSTANT_FOLD_FUNCTIONS_NEED_GUARDS)
+    fold = dict.fromkeys(_CORE_CONSTANT_FOLD_FUNCTIONS)
+    for name, device_interface in get_registered_device_interfaces():
+        if ":" in name:
+            # skip device index aliases like "cuda:0"
+            continue
+        interface_need_guards = device_interface.dynamo_constant_fold_fns_need_guards
+        need_guards.update(dict.fromkeys(interface_need_guards))
+        # need-guards functions are also constant-foldable
+        fold.update(dict.fromkeys(interface_need_guards))
+        fold.update(dict.fromkeys(device_interface.dynamo_constant_fold_fns))
+    constant_fold_functions_need_guards.clear()
+    constant_fold_functions_need_guards.update(need_guards)
+    constant_fold_functions.clear()
+    constant_fold_functions.update(fold)
+
+
+# Convert to dicts for O(1) access times
+constant_fold_functions_need_guards: dict = {}
+constant_fold_functions: dict = {}
+_rebuild_constant_fold_tables()
 
 # Ops that consume scalar values from 0-d tensors (via .item()) for computation
 # only, not for output shapes. When capture_scalar_outputs is enabled, these ops
