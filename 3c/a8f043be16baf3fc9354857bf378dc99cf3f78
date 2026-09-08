@@ -1,0 +1,40 @@
+torch/_dynamo/variables/torch.py
+  s_8e258034c281fc::t_f7436ed368631c 250,253-254,265-266,268,271-273,275
+  s_8e258034c281fc::t_9145c1b9a1f4f2 309-333,337-338
+  s_8e258034c281fc::t_9b12e282345609 2850
+  s_8e258034c281fc::t_ffc11379576c39 167-202
+  s_8e258034c281fc::t_6651174027004f 296-308,339
+test/dynamo/test_device_derived_tables.py
+  s_8e258034c281fc::t_adab9801623a4f 4,60,75,79-215
+torch/_dynamo/device_interface.py
+  s_8e258034c281fc::t_c932431f5f2e8b 662-664
+  s_8e258034c281fc::t_5f92190928e260 269-285,330-336,567-568,731,852
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "3ca8f043be16baf3fc9354857bf378dc99cf3f78",
+  "prompts": {},
+  "sessions": {
+    "s_8e258034c281fc": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a9f77684189a9cb0716456a",
+        "model": "glm-5.3-flash__dev"
+      },
+      "human_author": "chenm-123 <18729740621@163.com>",
+      "custom_attributes": {
+        "display_model_name": "GLM-5.3-Flash",
+        "client_type": "ide",
+        "tool_name": "RunCommand",
+        "external_session_id": "6a9f77684189a9cb0716456a",
+        "tool_use_id": "6a9fc9f63e43e47323eded10",
+        "operation_id": "6a9fc9f63e43e47323eded10",
+        "source_scene": "agent",
+        "edit_kind": "bash",
+        "runtime_client": "trae-tob-git-ai",
+        "session_id": "6a9f77684189a9cb0716456a"
+      }
+    }
+  }
+}
