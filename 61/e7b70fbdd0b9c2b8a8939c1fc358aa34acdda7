@@ -1,0 +1,44 @@
+test/dynamo/test_constant_fold_registry.py
+  s_8e258034c281fc::t_7c2eb755f69372 1-47,49-79
+  s_8e258034c281fc::t_18e9fe265f4a5f 48
+torch/_dynamo/device_interface.py
+  s_8e258034c281fc::t_bd2c30ab52c44a 19
+  s_8e258034c281fc::t_eb7c0316b06095 259-268
+  s_8e258034c281fc::t_4878f3a6b8166d 535-543
+  s_8e258034c281fc::t_d3ed165e5df7e6 697-702
+  s_8e258034c281fc::t_3bf7f34fb91134 816-819,822-829
+  s_8e258034c281fc::t_731bc2857e9480 422-423
+  s_8e258034c281fc::t_bab57f1769abfa 305-313
+  s_8e258034c281fc::t_cb62e237dadc4f 820-821
+torch/_dynamo/variables/torch.py
+  s_8e258034c281fc::t_b14f83e700b35f 212,219,238-240,242,249-250,254-260,266,278-298
+  s_8e258034c281fc::t_5c3eeb346b0a61 251-253,261-265,267-277
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "61e7b70fbdd0b9c2b8a8939c1fc358aa34acdda7",
+  "prompts": {},
+  "sessions": {
+    "s_8e258034c281fc": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a9f77684189a9cb0716456a",
+        "model": "glm-5.3-flash__dev"
+      },
+      "human_author": "chenm-123 <18729740621@163.com>",
+      "custom_attributes": {
+        "tool_use_id": "6a9fc6b83e43e47323edec89",
+        "session_id": "6a9f77684189a9cb0716456a",
+        "external_session_id": "6a9f77684189a9cb0716456a",
+        "client_type": "ide",
+        "edit_kind": "file_edit",
+        "source_scene": "agent",
+        "runtime_client": "trae-tob-git-ai",
+        "tool_name": "Edit",
+        "display_model_name": "GLM-5.3-Flash",
+        "operation_id": "6a9fc6b83e43e47323edec89"
+      }
+    }
+  }
+}
