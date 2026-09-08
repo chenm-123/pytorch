@@ -9,6 +9,7 @@ from typing import Any, TYPE_CHECKING
 import sympy
 
 import torch
+from torch._dynamo.device_interface import get_interface_for_device
 from torch._inductor.runtime.runtime_utils import next_power_of_2
 from torch._inductor.scheduler import MixOrderReduction
 from torch.utils._sympy.value_ranges import bound_sympy
@@ -137,6 +138,15 @@ class InductorChoices:
     def get_config_heuristics(
         self, device_type: str | None = "cuda"
     ) -> BaseConfigHeuristic:
+        # Prefer a device-provided heuristic (out-of-tree backends may
+        # override the DeviceInterface hook); fall back to the built-in
+        # selection for devices without one (or with no interface).
+        try:
+            heuristics = get_interface_for_device(device_type).get_config_heuristics()
+        except NotImplementedError:
+            heuristics = None
+        if heuristics is not None:
+            return heuristics
         if device_type == "cuda":
             if torch.version.hip is None:
                 return CUDAConfigHeuristic()

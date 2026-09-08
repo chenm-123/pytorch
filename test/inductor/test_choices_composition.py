@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 from unittest.mock import patch
 
+from torch._dynamo.device_interface import DeviceInterface, device_interfaces
 from torch._inductor import config
 from torch._inductor.choices import (
     create_inductor_choices,
@@ -14,11 +15,20 @@ from torch._inductor.choices import (
     registered_inductor_choices,
     unregister_inductor_choices,
 )
+from torch._inductor.heuristics.template.triton import BaseConfigHeuristic
 from torch._inductor.virtualized import _choices, threadlocal, V
 from torch.testing._internal.common_utils import run_tests, TestCase
 
 
 _UNSET = object()
+
+_CUSTOM_HEURISTIC = BaseConfigHeuristic()
+
+
+class _HookHeuristicsInterface(DeviceInterface):
+    @staticmethod
+    def get_config_heuristics():
+        return _CUSTOM_HEURISTIC
 
 
 class AlphaChoices(InductorChoices):
@@ -351,6 +361,30 @@ class ChoicesCompositionTest(TestCase):
             V.choices.uuid(),
             ("composed_inductor_choices", ("alpha:_alpha:2", "beta")),
         )
+
+
+class DeviceConfigHeuristicsHookTest(TestCase):
+    """Tests for the DeviceInterface.get_config_heuristics hook consumed by
+    InductorChoices.get_config_heuristics."""
+
+    def test_device_provided_heuristics_is_used(self):
+        # An out-of-tree interface overriding the hook supplies its own
+        # heuristic, without patching torch._inductor.choices.
+        with patch.dict(device_interfaces, {"fake_hook_dev": _HookHeuristicsInterface}):
+            heuristics = InductorChoices().get_config_heuristics("fake_hook_dev")
+        self.assertIs(heuristics, _CUSTOM_HEURISTIC)
+
+    def test_unimplemented_hook_falls_back_to_builtin(self):
+        # A registered interface that does not override the hook (base
+        # returns None) falls back to the built-in selection.
+        with patch.dict(device_interfaces, {"fake_bare_dev": DeviceInterface}):
+            heuristics = InductorChoices().get_config_heuristics("fake_bare_dev")
+            self.assertIsInstance(heuristics, BaseConfigHeuristic)
+
+        # A device with no registered interface raises NotImplementedError,
+        # which is swallowed and also falls back to the built-in selection.
+        heuristics = InductorChoices().get_config_heuristics("fake_unknown_dev")
+        self.assertIsInstance(heuristics, BaseConfigHeuristic)
 
 
 def _as_choices(obj: Any) -> InductorChoices:

@@ -255,6 +255,21 @@ class DeviceInterface:
                 "This device is not capable of supporting Triton"
             )
 
+    @staticmethod
+    def get_config_heuristics() -> Any:
+        """
+        Optional hook for a device to provide its own Inductor config
+        heuristics (a `torch._inductor.heuristics.template.triton
+        .BaseConfigHeuristic` subclass), used for autotuning config
+        selection.
+
+        Returns None (the default) to fall back to the core's built-in
+        heuristic selection for known devices, or the base heuristic for
+        unknown ones. Out-of-tree backends may override this to supply
+        their own heuristic class without patching `torch._inductor.choices`.
+        """
+        return None
+
 
 class DeviceGuard:
     """
