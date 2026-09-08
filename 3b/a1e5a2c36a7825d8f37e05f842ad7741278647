@@ -1,0 +1,45 @@
+torch/_inductor/codegen/common.py
+  s_8e258034c281fc::t_f103f2cd689dd3 423-440
+torch/_inductor/codegen/cutlass/cache.py
+  s_8e258034c281fc::t_cf53a15ef0a4aa 77-79
+  s_8e258034c281fc::t_f3ac3b078d1402 13
+torch/_inductor/codegen/cuda/device_op_overrides.py
+  s_8e258034c281fc::t_a24d94290ba16d 506-513
+  s_8e258034c281fc::t_31549ac2cefcfc 12
+torch/_inductor/codegen/xpu/device_op_overrides.py
+  s_8e258034c281fc::t_c46877dd668b13 77-83
+torch/_inductor/codegen/cutlass/scheduling.py
+  s_8e258034c281fc::t_e1464563d97b93 138-142,144
+  s_8e258034c281fc::t_1ba1f1ecb931af 29
+test/inductor/test_device_backend_hooks.py
+  s_8e258034c281fc::t_97ce3710cc49a6 132-170
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "3ba1e5a2c36a7825d8f37e05f842ad7741278647",
+  "prompts": {},
+  "sessions": {
+    "s_8e258034c281fc": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a9f77684189a9cb0716456a",
+        "model": "glm-5.3-flash__dev"
+      },
+      "human_author": "chenm-123 <18729740621@163.com>",
+      "custom_attributes": {
+        "tool_id": "Edit",
+        "session_id": "6a9f77684189a9cb0716456a",
+        "dedupe_key": "6a9f77684189a9cb0716456a:6a9fbefb3e43e47323edebb6:afterEdit:c5fc7578",
+        "tool_type": "agent",
+        "source_scene": "unknown",
+        "external_session_id": "6a9f77684189a9cb0716456a",
+        "client_type": "ide",
+        "runtime_client": "trae-tob-git-ai",
+        "operation_id": "6a9fbefb3e43e47323edebb6",
+        "edit_kind": "file_edit",
+        "tool_use_id": "6a9fbefb3e43e47323edebb6"
+      }
+    }
+  }
+}
